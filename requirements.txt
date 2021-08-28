@@ -1,1 +1,1 @@
-python-chess
+chess~=1.6.1
