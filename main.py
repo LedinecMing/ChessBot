@@ -1,7 +1,7 @@
-import random
-
-import chess.svg
-
+from SQLdb import DB
+import chess
+current_games = DB("games")
+current_games.create("games", "(id0 INT, id1 INT)")
 
 def take_figures_uci(game_board):
     """
@@ -34,22 +34,16 @@ def take_figures_move(game_board, figure):
 
     return figure_move
 
+def new_game(id0, id1):
+	if current_games.get("games", "*", f"WHERE id0={id0} AND id1={id1}") == ():
+		current_games.add("games", f"({id0}, {id1})")
+		return True
+	else:
+		return False
 
-board = chess.Board()  # Создать доску
-
-# Генерация 10 случайных ходов из возможных
-for i in range(10):
-    figures = take_figures_uci(board)  # Получение всех возможных фигур для хода
-    my_figure = random.choice(figures)  # Взять случайную фигуру для совершения хода
-    figure_move = take_figures_move(board, my_figure)  # Получение всех возможных ходов для выбранной фигру
-    my_move = random.choice(figure_move)  # Выбрать случайный ход
-
-    board.push_san(f'{my_figure}{my_move}')  # Отправить ход на доску
-    print(board, end='\n\n')  # Отрисовать доску в консоли
-    move = chess.Move.from_uci(f'{my_figure}{my_move}')  # Сохранить ход
-
-    img = chess.svg.board(board, lastmove=move, size=350)  # Создать SVG с последним ходом
-
-    # записть SVG в файл для просмотра
-    with open(f'game_svg/board {i}.svg', 'w') as f:
-        f.write(img)
+def stop_game(id0, id1):
+	if current_games.get("games", "*", f"WHERE id0={id0} AND id1={id1}") != ():
+		current_games.cursor.execute(f"DELETE FROM games WHERE id1={id1} AND id0={id0}")
+		return True
+	else:
+		return False
